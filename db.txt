@@ -1,0 +1,9 @@
+Table Name -> admin
+	
+	columns Name->
+		1. Email
+		2. Username
+		3. password
+		4. Mobile
+		5. Full Name
+		6. type (admin, sub-admin)
