@@ -2,10 +2,10 @@
 -- version 5.0.4
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: May 03, 2021 at 09:32 AM
--- Server version: 10.4.16-MariaDB
--- PHP Version: 7.4.12
+-- Host: localhost
+-- Generation Time: May 13, 2021 at 07:30 AM
+-- Server version: 10.4.17-MariaDB
+-- PHP Version: 8.0.2
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -48,6 +48,23 @@ INSERT INTO `admin` (`email`, `Username`, `password`, `Mobile`, `fullName`, `typ
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `cases`
+--
+
+CREATE TABLE `cases` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `caseStatus` varchar(255) NOT NULL,
+  `incidentDateTime` datetime NOT NULL,
+  `incidentPlace` text NOT NULL,
+  `crimeType` varchar(255) NOT NULL,
+  `criminal` int(11) NOT NULL,
+  `fileNo` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `crimetype`
 --
 
@@ -55,6 +72,15 @@ CREATE TABLE `crimetype` (
   `name` varchar(255) NOT NULL,
   `descripition` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `crimetype`
+--
+
+INSERT INTO `crimetype` (`name`, `descripition`) VALUES
+('Domestic violence', 'Domestic violence\n'),
+('Dowry', 'Dowry !!\n'),
+('muder', 'muder charges\n');
 
 -- --------------------------------------------------------
 
@@ -65,12 +91,19 @@ CREATE TABLE `crimetype` (
 CREATE TABLE `criminal` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `dob` date NOT NULL,
+  `dob` datetime NOT NULL,
   `gender` varchar(20) NOT NULL,
   `address` text NOT NULL,
   `age` int(11) NOT NULL,
-  `image` varchar(255) NOT NULL
+  `image` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `criminal`
+--
+
+INSERT INTO `criminal` (`id`, `name`, `dob`, `gender`, `address`, `age`, `image`) VALUES
+(12, 'ram', '1995-01-01 00:00:00', 'Male', 'amritsar', 26, 'Images/12.png');
 
 --
 -- Indexes for dumped tables
@@ -82,6 +115,13 @@ CREATE TABLE `criminal` (
 ALTER TABLE `admin`
   ADD PRIMARY KEY (`email`),
   ADD UNIQUE KEY `Username` (`Username`);
+
+--
+-- Indexes for table `cases`
+--
+ALTER TABLE `cases`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `crimeType` (`crimeType`);
 
 --
 -- Indexes for table `crimetype`
@@ -100,10 +140,16 @@ ALTER TABLE `criminal`
 --
 
 --
+-- AUTO_INCREMENT for table `cases`
+--
+ALTER TABLE `cases`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `criminal`
 --
 ALTER TABLE `criminal`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

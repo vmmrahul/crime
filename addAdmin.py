@@ -185,4 +185,6 @@ class AddAdmin:
                 messagebox.showerror("", "invalid Mobile Number")
 
 
-AddAdmin()
+
+if __name__ == '__main__':
+    AddAdmin()

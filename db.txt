@@ -7,3 +7,4 @@ Table Name -> admin
 		4. Mobile
 		5. Full Name
 		6. type (admin, sub-admin)
+
