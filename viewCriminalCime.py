@@ -155,10 +155,10 @@ class editCasePage:
         conn = makeConnections()
         cr = conn.cursor()
         cr.execute(query)
-        criminaldata = cr.fetchone()
+        self.criminaldata = cr.fetchone()
 
         self.root = Tk()
-        self.root.title("Add Victim")
+        self.root.title("Edit Case")
         self.root.config(bg=self.bg)
         self.root.geometry("{0}x{0}+0+0".format(self.root.winfo_screenwidth(), self.root.winfo_screenheight()))
 
@@ -168,44 +168,28 @@ class editCasePage:
 
         self.criminalId = Label(body, text="Criminal:", font=self.font, bg=self.bg, fg=self.fg)
         self.en_criminalId = Entry(body, width=80)
-        self.en_criminalId.insert(0, criminaldata[6])
+        self.en_criminalId.insert(0, self.criminaldata[6])
         self.en_criminalId.config(state='readonly')
         self.criminalId.grid(row=0, column=0, pady=self.py)
         self.en_criminalId.grid(row=0, column=1, pady=self.py)
 
-        query = "select * from crimetype"
-        conn = makeConnections()
-        cr = conn.cursor()
-        cr.execute(query)
-        result = cr.fetchall()
-        crimeTypeList = []
-        for row in result:
-            crimeTypeList.append(row[0])
-
-        self.crimeType = Label(body, text="Crime Type", font=self.font, bg=self.bg, fg=self.fg)
-        self.en_crimeType = ttk.Combobox(body, values=crimeTypeList, state='readonly', width=80)
-        self.crimeType.grid(row=1, column=0, pady=self.py)
-        self.en_crimeType.grid(row=1, column=1, pady=self.py)
 
         self.casename = Label(body, text="Case Name", font=self.font, bg=self.bg, fg=self.fg)
         self.en_casename = Entry(body, width=80)
+        self.en_casename.insert(0, self.criminaldata[1])
         self.casename.grid(row=2, column=0, pady=self.py)
         self.en_casename.grid(row=2, column=1, pady=self.py)
 
         self.caseStatus = Label(body, text="case Status", font=self.font, bg=self.bg, fg=self.fg)
-        self.en_caseStatus = Entry(body, width=80)
+        self.en_caseStatus = ttk.Combobox(body,  values=('pending','finish'), state='readonly', width=80)
         self.caseStatus.grid(row=3, column=0, pady=self.py)
         self.en_caseStatus.grid(row=3, column=1, pady=self.py)
 
-        self.incidentPlace = Label(body, text="incident Place", font=self.font, bg=self.bg, fg=self.fg)
-        self.en_incidentPlace = Entry(body, width=80)
-        self.incidentPlace.grid(row=3, column=0, pady=self.py)
-        self.en_incidentPlace.grid(row=3, column=1, pady=self.py)
 
         self.incidentDateTime = Label(body, text="incident Date Time", font=self.font, bg=self.bg, fg=self.fg)
         incidentDateTimeBox = Frame(body, bg=self.bg)
-        self.incidentDateTime.grid(row=4, column=0, pady=self.py)
-        incidentDateTimeBox.grid(row=4, column=1, pady=self.py)
+        self.incidentDateTime.grid(row=5, column=0, pady=self.py)
+        incidentDateTimeBox.grid(row=5, column=1, pady=self.py)
 
         day = Label(incidentDateTimeBox, text='Day', bg=self.bg)
         day.grid(row=0, column=0)
@@ -237,15 +221,27 @@ class editCasePage:
         self.sec = Spinbox(incidentDateTimeBox, from_=0, to=60, width=5, state='readonly')
         self.sec.grid(row=1, column=5)
 
-        self.fileNo = Label(body, text="File No", font=self.font, bg=self.bg, fg=self.fg)
-        self.en_fileNo = Entry(body, width=80)
-        self.fileNo.grid(row=5, column=0, pady=self.py)
-        self.en_fileNo.grid(row=5, column=1, pady=self.py)
 
-        btnSubmit = Button(body, text='Submit', command=self.btnSubmitCases)
-        btnSubmit.grid(row=6, column=1)
+        btnSubmit = Button(body, text='Submit', command=self.btnEditSubmit)
+        btnSubmit.grid(row=7, column=1)
 
         self.root.mainloop()
+
+    def btnEditSubmit(self):
+        en_criminalId = self.en_criminalId.get()
+        en_casename = self.en_casename.get()
+        caseStatus = self.en_caseStatus.get()
+        insDateTime = f"{self.year.get()}-{self.month.get()}-{self.day.get()} {self.Hour.get()}:{self.Min.get()}:{self.sec.get()}"
+        insDateTime = datetime.datetime.strptime(insDateTime, '%Y-%m-%d %H:%M:%S')
+        query = f"UPDATE `cases` SET `name`='{en_casename}',`caseStatus`='{caseStatus}',`incidentDateTime`='{insDateTime}' WHERE `id`='{self.criminaldata[0]}'"
+
+        conn =makeConnections()
+        cr =conn.cursor()
+        cr.execute(query)
+        conn.commit()
+        messagebox.showinfo("","Success Fully update")
+        self.root.destroy()
+
 
 
 class ViewCriminal:
@@ -324,6 +320,7 @@ class ViewCriminal:
             victimFrame = Frame(self.viewCases)
             victimFrame.pack(pady=self.py + 20)
 
+
             btnVictim = Button(victimFrame, text="Victim", command=self.btnVictimView)
             btnVictim.grid(row=0, column=0)
             btnAddVictim = Button(victimFrame, text="Add Victim", command=self.btnVictimAdd)
@@ -337,6 +334,7 @@ class ViewCriminal:
 
     def btnEditcase(self):
         data = self.ViewCasetree.item(self.ViewCasetree.focus())['values']
+        print(data)
         if not (data == ''):
             obj = editCasePage(data[0])
         else:
@@ -408,19 +406,19 @@ class ViewCriminal:
             self.en_casename.grid(row=2, column=1, pady=self.py)
 
             self.caseStatus = Label(body, text="case Status", font=self.font, bg=self.bg, fg=self.fg)
-            self.en_caseStatus = Entry(body, width=80)
+            self.en_caseStatus = ttk.Combobox(body, values=('pending','finish'), state='readonly', width=80)
             self.caseStatus.grid(row=3, column=0, pady=self.py)
             self.en_caseStatus.grid(row=3, column=1, pady=self.py)
 
             self.incidentPlace = Label(body, text="incident Place", font=self.font, bg=self.bg, fg=self.fg)
             self.en_incidentPlace = Entry(body, width=80)
-            self.incidentPlace.grid(row=3, column=0, pady=self.py)
-            self.en_incidentPlace.grid(row=3, column=1, pady=self.py)
+            self.incidentPlace.grid(row=4, column=0, pady=self.py)
+            self.en_incidentPlace.grid(row=4, column=1, pady=self.py)
 
             self.incidentDateTime = Label(body, text="incident Date Time", font=self.font, bg=self.bg, fg=self.fg)
             incidentDateTimeBox = Frame(body, bg=self.bg)
-            self.incidentDateTime.grid(row=4, column=0, pady=self.py)
-            incidentDateTimeBox.grid(row=4, column=1, pady=self.py)
+            self.incidentDateTime.grid(row=5, column=0, pady=self.py)
+            incidentDateTimeBox.grid(row=5, column=1, pady=self.py)
 
             day = Label(incidentDateTimeBox, text='Day', bg=self.bg)
             day.grid(row=0, column=0)
@@ -454,11 +452,11 @@ class ViewCriminal:
 
             self.fileNo = Label(body, text="File No", font=self.font, bg=self.bg, fg=self.fg)
             self.en_fileNo = Entry(body, width=80)
-            self.fileNo.grid(row=5, column=0, pady=self.py)
-            self.en_fileNo.grid(row=5, column=1, pady=self.py)
+            self.fileNo.grid(row=6, column=0, pady=self.py)
+            self.en_fileNo.grid(row=6, column=1, pady=self.py)
 
             btnSubmit = Button(body, text='Submit', command=self.btnSubmitCases)
-            btnSubmit.grid(row=6, column=1)
+            btnSubmit.grid(row=7, column=1)
 
             self.win.mainloop()
 
