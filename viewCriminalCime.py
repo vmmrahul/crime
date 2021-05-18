@@ -5,6 +5,249 @@ from tkinter import messagebox
 import datetime
 
 
+class ViewVictim:
+    font = ('arial', 16)
+    font_u = ('arial', 16, 'underline')
+    font_b = ('arial', 16, 'bold')
+    heading = ('arial', 24, 'bold', 'underline')
+    px = 15
+    py = 15
+    bg = '#ccccff'
+    fg = '#00134d'
+    width = 50
+    s_width = 15
+    height = 2
+
+    def __init__(self, id):
+        self.id = id
+
+        self.root = Tk()
+        self.root.title("View Case")
+        self.root.config(bg=self.bg)
+        self.root.geometry("{0}x{0}+0+0".format(self.root.winfo_screenwidth(), self.root.winfo_screenheight()))
+
+        Label(self.root, text='Manage Victim', font=self.heading, bg=self.bg, fg=self.fg).pack(pady=self.py + 20)
+
+        columns = ('id', "Name", 'Address', 'Mobile', 'Case')
+        self.tree = ttk.Treeview(self.root, selectmode='browse',
+                                 column=columns)
+        vsb = ttk.Scrollbar(self.root, orient="vertical", command=self.tree.yview)
+        vsb.pack(side=RIGHT, fill=Y)
+        self.tree.configure(yscrollcommand=vsb.set)
+
+        for row in columns:
+            self.tree.heading(row, text=row)
+
+        self.tree.pack(side="top", fill="both", expand=1)
+        self.tree.column('#0', stretch=False, minwidth=0, width=0)
+
+        btnContainer = Frame(self.root)
+        btnContainer.pack(pady=self.py + 20)
+
+        self.viewVictimData(id)
+
+        self.root.mainloop()
+
+    def viewVictimData(self, id):
+        query = "SELECT * FROM `victim` where cases ='{}'".format(id)
+        conn = makeConnections()
+        cr = conn.cursor()
+        cr.execute(query)
+        result = cr.fetchall()
+
+        for k in self.tree.get_children():
+            self.tree.delete(k)
+        for i in range(0, len(result)):
+            self.tree.insert("", value=result[i], index=i)
+
+class addVictim:
+    font = ('arial', 16)
+    font_u = ('arial', 16, 'underline')
+    font_b = ('arial', 16, 'bold')
+    heading = ('arial', 24, 'bold', 'underline')
+    px = 15
+    py = 15
+    bg = '#ccccff'
+    fg = '#00134d'
+    width = 50
+    s_width = 15
+    height = 2
+
+    def __init__(self, id):
+        self.root= Tk()
+        self.root.title("Add Victim")
+        self.root.config(bg=self.bg)
+        self.root.geometry("{0}x{0}+0+0".format(self.root.winfo_screenwidth(), self.root.winfo_screenheight()))
+
+        Label(self.root, text='Add Victim', font=('arial', 24, 'bold', 'underline')).pack()
+        body = Frame(self.root)
+        body.pack(pady=20)
+
+        self.caseid = Label(body, text="case id")
+        self.en_caseid = Entry(body, width=80)
+        self.en_caseid.insert(0, id)
+        self.en_caseid.config(state='readonly')
+        self.caseid.grid(row=0, column=0)
+        self.en_caseid.grid(row=0, column=1)
+
+
+        self.name = Label(body, text='Name')
+        self.en_name = Entry(body, width=80)
+        self.name.grid(row=1,column=0)
+        self.en_name.grid(row=1,column=1)
+
+        self.Address = Label(body, text='Address')
+        self.en_Address = Entry(body, width=80)
+        self.Address.grid(row=2,column=0)
+        self.en_Address.grid(row=2,column=1)
+
+        self.Mobile = Label(body, text='Mobile')
+        self.en_Mobile = Entry(body, width=80)
+        self.Mobile.grid(row=3,column=0)
+        self.en_Mobile.grid(row=3,column=1)
+
+
+        submitbtn = Button(body, text='submit', command=self.btnSubmit)
+        submitbtn.grid(row=4, column=1)
+
+
+        self.msglabel = Label(self.root)
+        self.msglabel.pack()
+
+        self.root.mainloop()
+
+    def btnSubmit(self):
+        en_caseid = self.en_caseid.get()
+        en_name = self.en_name.get()
+        en_Address = self.en_Address.get()
+        en_Mobile = self.en_Mobile.get()
+
+        if en_caseid == '' or en_name == '' or en_Address == '' or en_Mobile == '':
+            self.msglabel.config(text="All Fields Are required",padx=self.px, pady=self.py, bg='red', fg='white')
+        else:
+            if checkNumber(en_Mobile):
+                query =f"INSERT INTO `victim`(`name`, `Address`, `mobile`, `cases`) VALUES ('{en_name}','{en_Address}','{en_Mobile}','{en_caseid}')"
+                conn = makeConnections()
+                cr = conn.cursor()
+                cr.execute(query)
+                conn.commit()
+                self.msglabel.config(text="Added Success Fully {}".format(en_name), padx=self.px, pady=self.py, bg='green',
+                                     fg='white')
+            else:
+                self.msglabel.config(text="{} is invalid".format(en_Mobile), padx=self.px, pady=self.py, bg='red', fg='white')
+
+
+class editCasePage:
+    font = ('arial', 16)
+    font_u = ('arial', 16, 'underline')
+    font_b = ('arial', 16, 'bold')
+    heading = ('arial', 24, 'bold', 'underline')
+    px = 15
+    py = 15
+    bg = '#ccccff'
+    fg = '#00134d'
+    width = 50
+    s_width = 15
+    height = 2
+
+    def __init__(self, id):
+        query = f"SELECT * FROM `cases` where id ='{id}'"
+        conn = makeConnections()
+        cr = conn.cursor()
+        cr.execute(query)
+        criminaldata = cr.fetchone()
+
+        self.root = Tk()
+        self.root.title("Add Victim")
+        self.root.config(bg=self.bg)
+        self.root.geometry("{0}x{0}+0+0".format(self.root.winfo_screenwidth(), self.root.winfo_screenheight()))
+
+        Label(self.root, text='Add Victim', font=('arial', 24, 'bold', 'underline')).pack()
+        body = Frame(self.root)
+        body.pack(pady=20)
+
+        self.criminalId = Label(body, text="Criminal:", font=self.font, bg=self.bg, fg=self.fg)
+        self.en_criminalId = Entry(body, width=80)
+        self.en_criminalId.insert(0, criminaldata[6])
+        self.en_criminalId.config(state='readonly')
+        self.criminalId.grid(row=0, column=0, pady=self.py)
+        self.en_criminalId.grid(row=0, column=1, pady=self.py)
+
+        query = "select * from crimetype"
+        conn = makeConnections()
+        cr = conn.cursor()
+        cr.execute(query)
+        result = cr.fetchall()
+        crimeTypeList = []
+        for row in result:
+            crimeTypeList.append(row[0])
+
+        self.crimeType = Label(body, text="Crime Type", font=self.font, bg=self.bg, fg=self.fg)
+        self.en_crimeType = ttk.Combobox(body, values=crimeTypeList, state='readonly', width=80)
+        self.crimeType.grid(row=1, column=0, pady=self.py)
+        self.en_crimeType.grid(row=1, column=1, pady=self.py)
+
+        self.casename = Label(body, text="Case Name", font=self.font, bg=self.bg, fg=self.fg)
+        self.en_casename = Entry(body, width=80)
+        self.casename.grid(row=2, column=0, pady=self.py)
+        self.en_casename.grid(row=2, column=1, pady=self.py)
+
+        self.caseStatus = Label(body, text="case Status", font=self.font, bg=self.bg, fg=self.fg)
+        self.en_caseStatus = Entry(body, width=80)
+        self.caseStatus.grid(row=3, column=0, pady=self.py)
+        self.en_caseStatus.grid(row=3, column=1, pady=self.py)
+
+        self.incidentPlace = Label(body, text="incident Place", font=self.font, bg=self.bg, fg=self.fg)
+        self.en_incidentPlace = Entry(body, width=80)
+        self.incidentPlace.grid(row=3, column=0, pady=self.py)
+        self.en_incidentPlace.grid(row=3, column=1, pady=self.py)
+
+        self.incidentDateTime = Label(body, text="incident Date Time", font=self.font, bg=self.bg, fg=self.fg)
+        incidentDateTimeBox = Frame(body, bg=self.bg)
+        self.incidentDateTime.grid(row=4, column=0, pady=self.py)
+        incidentDateTimeBox.grid(row=4, column=1, pady=self.py)
+
+        day = Label(incidentDateTimeBox, text='Day', bg=self.bg)
+        day.grid(row=0, column=0)
+        self.day = Spinbox(incidentDateTimeBox, from_=1, to=31, width=5, state='readonly')
+        self.day.grid(row=1, column=0)
+
+        day = Label(incidentDateTimeBox, text='month', bg=self.bg)
+        day.grid(row=0, column=1)
+        self.month = Spinbox(incidentDateTimeBox, from_=1, to=12, width=5, state='readonly')
+        self.month.grid(row=1, column=1)
+
+        day = Label(incidentDateTimeBox, text='year', bg=self.bg)
+        day.grid(row=0, column=2)
+        self.year = Spinbox(incidentDateTimeBox, from_=2018, to=2080, width=5, state='readonly')
+        self.year.grid(row=1, column=2)
+
+        Hour = Label(incidentDateTimeBox, text='Hour', bg=self.bg)
+        Hour.grid(row=0, column=3)
+        self.Hour = Spinbox(incidentDateTimeBox, from_=1, to=12, width=5, state='readonly')
+        self.Hour.grid(row=1, column=3)
+
+        Min = Label(incidentDateTimeBox, text='Min', bg=self.bg)
+        Min.grid(row=0, column=4)
+        self.Min = Spinbox(incidentDateTimeBox, from_=0, to=60, width=5, state='readonly')
+        self.Min.grid(row=1, column=4)
+
+        sec = Label(incidentDateTimeBox, text='sec', bg=self.bg)
+        sec.grid(row=0, column=5)
+        self.sec = Spinbox(incidentDateTimeBox, from_=0, to=60, width=5, state='readonly')
+        self.sec.grid(row=1, column=5)
+
+        self.fileNo = Label(body, text="File No", font=self.font, bg=self.bg, fg=self.fg)
+        self.en_fileNo = Entry(body, width=80)
+        self.fileNo.grid(row=5, column=0, pady=self.py)
+        self.en_fileNo.grid(row=5, column=1, pady=self.py)
+
+        btnSubmit = Button(body, text='Submit', command=self.btnSubmitCases)
+        btnSubmit.grid(row=6, column=1)
+
+        self.root.mainloop()
+
+
 class ViewCriminal:
     font = ('arial', 16)
     font_u = ('arial', 16, 'underline')
@@ -64,7 +307,7 @@ class ViewCriminal:
 
             Label(self.viewCases, text='View Cases', font=self.heading, bg=self.bg, fg=self.fg).pack(pady=self.py + 20)
 
-            columns = ('name', 'caseStatus', 'incidentDateTime', 'incidentPlace', 'crimeType', 'criminal', 'fileNo')
+            columns = ('id','name', 'caseStatus', 'incidentDateTime', 'incidentPlace', 'crimeType', 'criminal', 'fileNo')
             self.ViewCasetree = ttk.Treeview(self.viewCases, selectmode='browse',
                                              column=columns)
             vsb = ttk.Scrollbar(self.viewCases, orient="vertical", command=self.ViewCasetree.yview)
@@ -77,9 +320,41 @@ class ViewCriminal:
             self.ViewCasetree.pack(side="top", fill="both", expand=1)
             self.ViewCasetree.column('#0', stretch=False, minwidth=0, width=0)
             self.viewCaseData(currentItem[0])
+
+            victimFrame = Frame(self.viewCases)
+            victimFrame.pack(pady=self.py + 20)
+
+            btnVictim = Button(victimFrame, text="Victim", command=self.btnVictimView)
+            btnVictim.grid(row=0, column=0)
+            btnAddVictim = Button(victimFrame, text="Add Victim", command=self.btnVictimAdd)
+            btnAddVictim.grid(row=0, column=1)
+            btnEditcase = Button(victimFrame, text="Edit Case", command=self.btnEditcase)
+            btnEditcase.grid(row=0, column=2)
+
             self.viewCases.mainloop()
         else:
             messagebox.showinfo('', 'Select one Item in Table')
+
+    def btnEditcase(self):
+        data = self.ViewCasetree.item(self.ViewCasetree.focus())['values']
+        if not (data == ''):
+            obj = editCasePage(data[0])
+        else:
+            messagebox.showinfo('', "Plz select one Row in Table !!")
+
+    def btnVictimAdd(self):
+        data = self.ViewCasetree.item(self.ViewCasetree.focus())['values']
+        if not (data == ''):
+            obj = addVictim(data[0])
+        else:
+            messagebox.showinfo('', "Plz select one Row in Table !!")
+
+    def btnVictimView(self):
+        data = self.ViewCasetree.item(self.ViewCasetree.focus())['values']
+        if not (data == ''):
+            obj = ViewVictim(data[0])
+        else:
+            messagebox.showinfo('', "Plz select one Row in Table !!")
 
     def viewCaseData(self, id):
         query = "SELECT * FROM `cases` where criminal='{}'".format(id)
@@ -142,7 +417,7 @@ class ViewCriminal:
             self.incidentPlace.grid(row=3, column=0, pady=self.py)
             self.en_incidentPlace.grid(row=3, column=1, pady=self.py)
 
-            self.incidentDateTime = Label(body, text="incident Date Time", font=self.font,bg=self.bg, fg=self.fg)
+            self.incidentDateTime = Label(body, text="incident Date Time", font=self.font, bg=self.bg, fg=self.fg)
             incidentDateTimeBox = Frame(body, bg=self.bg)
             self.incidentDateTime.grid(row=4, column=0, pady=self.py)
             incidentDateTimeBox.grid(row=4, column=1, pady=self.py)
