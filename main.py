@@ -6,7 +6,7 @@ from addCriminals import Criminal
 from viewCriminalCime import ViewCriminal
 from ttkthemes import themed_tk as tk
 from addAdmin import AddAdmin
-
+from searchCriminalByNameAndByCrime import searchCiminalByName
 
 class main:
     def __init__(self):
@@ -40,6 +40,13 @@ class main:
         menubar.add_cascade(label='criminal', menu=criminal)
         criminal.add_command(label='Add criminal', command=Criminal)
         criminal.add_command(label='View criminal', command=ViewCriminal)
+
+
+        searchCiminal = Menu(menubar, tearoff=0)
+        menubar.add_cascade(label='Search', menu=searchCiminal)
+        searchCiminal.add_command(label='By Name', command=searchCiminalByName)
+
+
         self.root.config(menu=menubar)
 
         Label(self.root, text="Criminal DataBase Managment system", font=heading, bg=bg, fg=fg).pack()
